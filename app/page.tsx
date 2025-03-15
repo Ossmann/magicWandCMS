@@ -1,5 +1,6 @@
 import Navbar from './components/Topbar/Topbar';
 import MobileNav from './components/Topbar/MobileNav';
+import ImageUploadForm from './components/ui/imageUploadForm';
 
 export default async function Home() {
 
@@ -12,6 +13,10 @@ export default async function Home() {
 
       <div className='block md:hidden fixed top-0 left-0 right-0 z-20'>
         <MobileNav />
+      </div>
+
+      <div className='mt-40'>
+        <ImageUploadForm />
       </div>
   
       {/* Empty bottom space */}
