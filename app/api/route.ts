@@ -1,33 +1,48 @@
-import { Client } from 'pg';
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
+import s3 from '../lib/aws_config';
 
-export default async function handler(req: NextRequest) {
-  const client = new Client({
-    host: process.env.PG_HOST,
-    port: parseInt(process.env.PG_PORT || '5432'),
-    user: process.env.PG_USER,
-    password: process.env.PG_PASSWORD,
-    database: process.env.PG_DATABASE,
-  });
+export async function GET() {
+    const params = {
+        Bucket: 'magic-wand-cms-bucket',
+        Prefix: 'uploads/',
+    };
 
-  try {
-    await client.connect();
+    try {
+        const data = await s3.listObjectsV2(params).promise();
 
-    const createTableQuery = `
-      CREATE TABLE IF NOT EXISTS images (
-        id SERIAL PRIMARY KEY,
-        file_name VARCHAR(100),
-        s3_url VARCHAR(100),
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      );
-    `;
-    await client.query(createTableQuery);
-    await client.end();
+        if (!data.Contents || data.Contents.length === 0) {
+            console.log('No files found in the specified folder.');
+            return NextResponse.json({ files: [] }, {
+                headers: {
+                    'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0, s-maxage=0, stale-while-revalidate=0',
+                    'Pragma': 'no-cache',
+                    'Expires': '0'
+                }
+            });
+        }
 
-    return NextResponse.json({ message: 'Table created successfully' }, { status: 200 });
-  } catch (error) {
-    console.error('Error creating table:', error);
-    await client.end();
-    return NextResponse.json({ error: 'Error creating table' }, { status: 500 });
-  }
+        const files = await Promise.all(data.Contents.map(async (item) => {
+            const signedUrl = await s3.getSignedUrlPromise('getObject', {
+                Bucket: params.Bucket,
+                Key: item.Key,
+                Expires: 60 * 5 // URL valid for 5 minutes
+            });
+
+            return {
+                key: item.Key,
+                url: signedUrl // Use the signed URL instead of the direct URL
+            };
+        }));
+
+        return NextResponse.json({ files }, {
+            headers: {
+                'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0, s-maxage=0, stale-while-revalidate=0',
+                'Pragma': 'no-cache',
+                'Expires': '0'
+            }
+        });
+    } catch (error) {
+        console.error('Error listing files:', error);
+        return NextResponse.json({ error: 'Error listing files' }, { status: 500 });
+    }
 }
