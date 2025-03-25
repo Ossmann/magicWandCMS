@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Oxanium } from "next/font/google";
 import "./globals.css";
 import Head from "next/head";
 // import GoogleTracking from "./components/GoogleTracking";
 
-const inter = Inter({ subsets: ["latin"] });
+const oxanium = Oxanium({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "Magic Tools CMS",
@@ -21,7 +21,7 @@ export default function RootLayout({
       <Head>
         <link rel="icon" href="/favicon.svg" />
       </Head>
-      <body className={`${inter.className} relative h-screen`}>
+      <body className={`${oxanium.className} relative h-screen`}>
 
       {/* <GoogleTracking /> */}
 

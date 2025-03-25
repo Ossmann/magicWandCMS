@@ -1,12 +1,12 @@
 import Navbar from './components/Topbar/Topbar';
 import MobileNav from './components/Topbar/MobileNav';
-import ImageUploadForm from './components/ui/imageUploadForm';
 import PDFUpload from './components/ui/upload_pdf_field';
+import Welcome from './components/Welcome';
 
 export default async function Home() {
 
   return (
-    <div className='relative h-screen'>
+    <div className='relative h-screen justify-center items-center flex flex-col'>
       
       <div className='hidden sm:mb-200 md:block fixed top-0 left-0 right-0 z-20'>
         <Navbar />
@@ -17,7 +17,7 @@ export default async function Home() {
       </div>
 
       <div className='mt-40'>
-        <ImageUploadForm />
+        <Welcome />
       </div>
 
       <div className='mt-40 w-1/3 text-center mx-auto'>
